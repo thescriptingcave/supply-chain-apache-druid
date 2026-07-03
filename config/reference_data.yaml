@@ -1,0 +1,752 @@
+# Reference Data Configuration for Supply Chain Data Generator
+
+warehouses:
+  - warehouse_id: "WH-001"
+    name: "Northeast Distribution Center"
+    region: "northeast"
+    city: "New York"
+    state: "NY"
+    country: "USA"
+    type: "distribution_center"
+    capacity_units: 500000
+    current_utilization: 0.72
+    zones:
+      - zone_id: "Z-A"
+        name: "Receiving"
+        type: "receiving"
+      - zone_id: "Z-B"
+        name: "Bulk Storage"
+        type: "bulk"
+      - zone_id: "Z-C"
+        name: "Pick & Pack"
+        type: "pick_pack"
+      - zone_id: "Z-D"
+        name: "Cold Storage"
+        type: "cold"
+        temperature_range: [2, 8]
+      - zone_id: "Z-E"
+        name: "Shipping"
+        type: "shipping"
+    operating_hours: "24/7"
+    has_cold_storage: true
+
+  - warehouse_id: "WH-002"
+    name: "Southeast Regional Warehouse"
+    region: "southeast"
+    city: "Atlanta"
+    state: "GA"
+    country: "USA"
+    type: "regional_warehouse"
+    capacity_units: 300000
+    current_utilization: 0.65
+    zones:
+      - zone_id: "Z-A"
+        name: "Receiving"
+        type: "receiving"
+      - zone_id: "Z-B"
+        name: "Storage"
+        type: "bulk"
+      - zone_id: "Z-C"
+        name: "Shipping"
+        type: "shipping"
+    operating_hours: "6AM-10PM"
+    has_cold_storage: false
+
+  - warehouse_id: "WH-003"
+    name: "Midwest Fulfillment Center"
+    region: "midwest"
+    city: "Chicago"
+    state: "IL"
+    country: "USA"
+    type: "fulfillment_center"
+    capacity_units: 400000
+    current_utilization: 0.58
+    zones:
+      - zone_id: "Z-A"
+        name: "Receiving"
+        type: "receiving"
+      - zone_id: "Z-B"
+        name: "Storage"
+        type: "bulk"
+      - zone_id: "Z-C"
+        name: "Cold Storage"
+        type: "cold"
+        temperature_range: [-18, -15]
+      - zone_id: "Z-D"
+        name: "Pick & Pack"
+        type: "pick_pack"
+      - zone_id: "Z-E"
+        name: "Shipping"
+        type: "shipping"
+    operating_hours: "24/7"
+    has_cold_storage: true
+
+  - warehouse_id: "WH-004"
+    name: "West Coast Distribution Hub"
+    region: "west"
+    city: "Los Angeles"
+    state: "CA"
+    country: "USA"
+    type: "distribution_center"
+    capacity_units: 450000
+    current_utilization: 0.78
+    zones:
+      - zone_id: "Z-A"
+        name: "Receiving"
+        type: "receiving"
+      - zone_id: "Z-B"
+        name: "Bulk Storage"
+        type: "bulk"
+      - zone_id: "Z-C"
+        name: "Cold Storage"
+        type: "cold"
+        temperature_range: [0, 4]
+      - zone_id: "Z-D"
+        name: "E-commerce Pick"
+        type: "ecommerce_pick"
+      - zone_id: "Z-E"
+        name: "Shipping"
+        type: "shipping"
+    operating_hours: "24/7"
+    has_cold_storage: true
+
+  - warehouse_id: "WH-005"
+    name: "Southwest Regional Warehouse"
+    region: "southwest"
+    city: "Dallas"
+    state: "TX"
+    country: "USA"
+    type: "regional_warehouse"
+    capacity_units: 250000
+    current_utilization: 0.61
+    zones:
+      - zone_id: "Z-A"
+        name: "Receiving"
+        type: "receiving"
+      - zone_id: "Z-B"
+        name: "Storage"
+        type: "bulk"
+      - zone_id: "Z-C"
+        name: "Shipping"
+        type: "shipping"
+    operating_hours: "6AM-10PM"
+    has_cold_storage: false
+
+products:
+  # Electronics Category
+  - product_id: "PROD-001"
+    name: "Wireless Bluetooth Headphones"
+    sku: "ELEC-BT-HP-001"
+    category: "electronics"
+    subcategory: "audio"
+    unit_weight_kg: 0.25
+    unit_volume_cbm: 0.002
+    unit_cost: 15.00
+    retail_price: 49.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 14
+    lead_time_days: 30
+    supplier_id: "SUP-001"
+
+  - product_id: "PROD-002"
+    name: "Smart Home Hub"
+    sku: "ELEC-SH-HUB-001"
+    category: "electronics"
+    subcategory: "smart_home"
+    unit_weight_kg: 0.45
+    unit_volume_cbm: 0.004
+    unit_cost: 35.00
+    retail_price: 99.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 21
+    lead_time_days: 45
+    supplier_id: "SUP-001"
+
+  - product_id: "PROD-003"
+    name: "Portable Power Bank 20000mAh"
+    sku: "ELEC-PB-20K-001"
+    category: "electronics"
+    subcategory: "power"
+    unit_weight_kg: 0.35
+    unit_volume_cbm: 0.001
+    unit_cost: 12.00
+    retail_price: 34.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 10
+    lead_time_days: 25
+    supplier_id: "SUP-002"
+
+  # Food & Beverage Category
+  - product_id: "PROD-004"
+    name: "Organic Cold-Pressed Juice Pack"
+    sku: "FNB-JUICE-ORG-001"
+    category: "food_beverage"
+    subcategory: "beverages"
+    unit_weight_kg: 2.5
+    unit_volume_cbm: 0.006
+    unit_cost: 8.00
+    retail_price: 19.99
+    is_perishable: true
+    requires_cold_storage: true
+    shelf_life_days: 14
+    safety_stock_days: 3
+    lead_time_days: 7
+    supplier_id: "SUP-003"
+
+  - product_id: "PROD-005"
+    name: "Premium Frozen Meals - Variety Pack"
+    sku: "FNB-FZMEAL-PREM-001"
+    category: "food_beverage"
+    subcategory: "frozen"
+    unit_weight_kg: 5.0
+    unit_volume_cbm: 0.012
+    unit_cost: 18.00
+    retail_price: 39.99
+    is_perishable: true
+    requires_cold_storage: true
+    shelf_life_days: 90
+    safety_stock_days: 7
+    lead_time_days: 14
+    supplier_id: "SUP-004"
+
+  - product_id: "PROD-006"
+    name: "Artisan Coffee Beans - Single Origin"
+    sku: "FNB-COFFE-ART-001"
+    category: "food_beverage"
+    subcategory: "coffee"
+    unit_weight_kg: 1.0
+    unit_volume_cbm: 0.003
+    unit_cost: 12.00
+    retail_price: 24.99
+    is_perishable: true
+    requires_cold_storage: false
+    shelf_life_days: 365
+    safety_stock_days: 14
+    lead_time_days: 21
+    supplier_id: "SUP-005"
+
+  # Health & Beauty Category
+  - product_id: "PROD-007"
+    name: "Organic Skincare Set"
+    sku: "HB-SKIN-ORG-001"
+    category: "health_beauty"
+    subcategory: "skincare"
+    unit_weight_kg: 0.8
+    unit_volume_cbm: 0.003
+    unit_cost: 22.00
+    retail_price: 59.99
+    is_perishable: true
+    requires_cold_storage: false
+    shelf_life_days: 730
+    safety_stock_days: 21
+    lead_time_days: 35
+    supplier_id: "SUP-006"
+
+  - product_id: "PROD-008"
+    name: "Premium Vitamin Supplements"
+    sku: "HB-VITAM-PREM-001"
+    category: "health_beauty"
+    subcategory: "supplements"
+    unit_weight_kg: 0.3
+    unit_volume_cbm: 0.001
+    unit_cost: 8.00
+    retail_price: 29.99
+    is_perishable: true
+    requires_cold_storage: false
+    shelf_life_days: 540
+    safety_stock_days: 14
+    lead_time_days: 28
+    supplier_id: "SUP-007"
+
+  # Home & Garden Category
+  - product_id: "PROD-009"
+    name: "Smart LED Light Bulb Pack"
+    sku: "HG-LIGHT-SMART-001"
+    category: "home_garden"
+    subcategory: "lighting"
+    unit_weight_kg: 0.4
+    unit_volume_cbm: 0.002
+    unit_cost: 10.00
+    retail_price: 29.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 14
+    lead_time_days: 30
+    supplier_id: "SUP-002"
+
+  - product_id: "PROD-010"
+    name: "Indoor Plant Care Kit"
+    sku: "HG-PLANT-CARE-001"
+    category: "home_garden"
+    subcategory: "gardening"
+    unit_weight_kg: 2.0
+    unit_volume_cbm: 0.008
+    unit_cost: 14.00
+    retail_price: 39.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 10
+    lead_time_days: 21
+    supplier_id: "SUP-008"
+
+  # Apparel Category
+  - product_id: "PROD-011"
+    name: "Performance Athletic T-Shirt"
+    sku: "APP-ATHL-TSHRT-001"
+    category: "apparel"
+    subcategory: "activewear"
+    unit_weight_kg: 0.2
+    unit_volume_cbm: 0.002
+    unit_cost: 8.00
+    retail_price: 34.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 14
+    lead_time_days: 45
+    supplier_id: "SUP-009"
+    has_variants: true
+    variants:
+      - size: "S"
+      - size: "M"
+      - size: "L"
+      - size: "XL"
+      - size: "XXL"
+      - color: "Black"
+      - color: "Navy"
+      - color: "Gray"
+
+  - product_id: "PROD-012"
+    name: "Winter Insulated Jacket"
+    sku: "APP-WNTR-JKET-001"
+    category: "apparel"
+    subcategory: "outerwear"
+    unit_weight_kg: 1.2
+    unit_volume_cbm: 0.008
+    unit_cost: 45.00
+    retail_price: 149.99
+    is_perishable: false
+    requires_cold_storage: false
+    shelf_life_days: null
+    safety_stock_days: 21
+    lead_time_days: 60
+    supplier_id: "SUP-009"
+    seasonal: true
+    season: "winter"
+
+suppliers:
+  - supplier_id: "SUP-001"
+    name: "ShenZhen Electronics Co."
+    region: "asia_pacific"
+    country: "China"
+    city: "Shenzhen"
+    tier: "strategic"
+    reliability_score: 0.92
+    on_time_delivery_rate: 0.88
+    quality_score: 0.95
+    lead_time_days: 30
+    shipping_method: "sea"
+    port_of_origin: "CNSZX"
+    incoterm: "FOB"
+
+  - supplier_id: "SUP-002"
+    name: "TechComponents Ltd."
+    region: "asia_pacific"
+    country: "Taiwan"
+    city: "Taipei"
+    tier: "preferred"
+    reliability_score: 0.88
+    on_time_delivery_rate: 0.85
+    quality_score: 0.91
+    lead_time_days: 25
+    shipping_method: "sea"
+    port_of_origin: "TWTPE"
+    incoterm: "CIF"
+
+  - supplier_id: "SUP-003"
+    name: "FreshHarvest Organics"
+    region: "north_america"
+    country: "USA"
+    city: "Sacramento"
+    state: "CA"
+    tier: "strategic"
+    reliability_score: 0.95
+    on_time_delivery_rate: 0.93
+    quality_score: 0.97
+    lead_time_days: 3
+    shipping_method: "road"
+    incoterm: "DAP"
+
+  - supplier_id: "SUP-004"
+    name: "GourmetFoods International"
+    region: "europe"
+    country: "Italy"
+    city: "Milan"
+    tier: "preferred"
+    reliability_score: 0.85
+    on_time_delivery_rate: 0.82
+    quality_score: 0.93
+    lead_time_days: 21
+    shipping_method: "sea"
+    port_of_origin: "ITMIL"
+    incoterm: "CIF"
+
+  - supplier_id: "SUP-005"
+    name: "ColombiaCoffee Exports"
+    region: "south_america"
+    country: "Colombia"
+    city: "Bogota"
+    tier: "approved"
+    reliability_score: 0.80
+    on_time_delivery_rate: 0.78
+    quality_score: 0.89
+    lead_time_days: 28
+    shipping_method: "sea"
+    port_of_origin: "COBOG"
+    incoterm: "FOB"
+
+  - supplier_id: "SUP-006"
+    name: "NaturalBeauty Labs"
+    region: "europe"
+    country: "France"
+    city: "Paris"
+    tier: "strategic"
+    reliability_score: 0.90
+    on_time_delivery_rate: 0.87
+    quality_score: 0.96
+    lead_time_days: 35
+    shipping_method: "sea"
+    port_of_origin: "FRPAR"
+    incoterm: "DDP"
+
+  - supplier_id: "SUP-007"
+    name: "VitaHealth Manufacturing"
+    region: "north_america"
+    country: "USA"
+    city: "New Jersey"
+    state: "NJ"
+    tier: "preferred"
+    reliability_score: 0.91
+    on_time_delivery_rate: 0.89
+    quality_score: 0.94
+    lead_time_days: 14
+    shipping_method: "road"
+    incoterm: "DAP"
+
+  - supplier_id: "SUP-008"
+    name: "GreenThumb Supplies"
+    region: "north_america"
+    country: "USA"
+    city: "Portland"
+    state: "OR"
+    tier: "approved"
+    reliability_score: 0.84
+    on_time_delivery_rate: 0.80
+    quality_score: 0.88
+    lead_time_days: 10
+    shipping_method: "road"
+    incoterm: "DAP"
+
+  - supplier_id: "SUP-009"
+    name: "AsiaTextile Industries"
+    region: "asia_pacific"
+    country: "Vietnam"
+    city: "Ho Chi Minh City"
+    tier: "preferred"
+    reliability_score: 0.86
+    on_time_delivery_rate: 0.83
+    quality_score: 0.90
+    lead_time_days: 45
+    shipping_method: "sea"
+    port_of_origin: "VNSGN"
+    incoterm: "FOB"
+
+carriers:
+  - carrier_id: "CAR-001"
+    name: "FastFreight Express"
+    service_level: "express"
+    avg_delivery_days: 2
+    on_time_rate: 0.95
+    cost_per_km: 0.15
+    has_gps_tracking: true
+    has_temp_control: true
+    fleet_size: 500
+
+  - carrier_id: "CAR-002"
+    name: "ReliableRoad Transport"
+    service_level: "standard"
+    avg_delivery_days: 5
+    on_time_rate: 0.88
+    cost_per_km: 0.08
+    has_gps_tracking: true
+    has_temp_control: false
+    fleet_size: 1200
+
+  - carrier_id: "CAR-003"
+    name: "ColdChain Logistics"
+    service_level: "cold_chain"
+    avg_delivery_days: 3
+    on_time_rate: 0.92
+    cost_per_km: 0.22
+    has_gps_tracking: true
+    has_temp_control: true
+    fleet_size: 300
+
+  - carrier_id: "CAR-004"
+    name: "EconomyShip Inc."
+    service_level: "economy"
+    avg_delivery_days: 7
+    on_time_rate: 0.82
+    cost_per_km: 0.05
+    has_gps_tracking: false
+    has_temp_control: false
+    fleet_size: 2000
+
+  - carrier_id: "CAR-005"
+    name: "LastMile Couriers"
+    service_level: "last_mile"
+    avg_delivery_days: 1
+    on_time_rate: 0.90
+    cost_per_km: 0.35
+    has_gps_tracking: true
+    has_temp_control: false
+    fleet_size: 800
+
+customers:
+  segments:
+    - segment_id: "SEG-001"
+      name: "Enterprise"
+      tier: "platinum"
+      avg_order_value: 5000
+      order_frequency_days: 7
+      discount_rate: 0.15
+      payment_terms_days: 30
+      percentage: 0.10
+
+    - segment_id: "SEG-002"
+      name: "Small Business"
+      tier: "gold"
+      avg_order_value: 1000
+      order_frequency_days: 14
+      discount_rate: 0.10
+      payment_terms_days: 15
+      percentage: 0.25
+
+    - segment_id: "SEG-003"
+      name: "Regular Consumer"
+      tier: "silver"
+      avg_order_value: 75
+      order_frequency_days: 30
+      discount_rate: 0.05
+      payment_terms_days: 0
+      percentage: 0.45
+
+    - segment_id: "SEG-004"
+      name: "Occasional Shopper"
+      tier: "bronze"
+      avg_order_value: 35
+      order_frequency_days: 90
+      discount_rate: 0.0
+      payment_terms_days: 0
+      percentage: 0.20
+
+production_lines:
+  - line_id: "PL-001"
+    name: "Electronics Assembly Line A"
+    facility_id: "FAC-001"
+    facility_name: "Main Manufacturing Plant"
+    region: "northeast"
+    products: ["PROD-001", "PROD-002", "PROD-003"]
+    capacity_per_hour: 200
+    shift_pattern: "3x8"
+    machines:
+      - machine_id: "MCH-001"
+        name: "SMT Pick & Place"
+        type: "smt"
+        oee_target: 0.85
+      - machine_id: "MCH-002"
+        name: "Soldering Station"
+        type: "soldering"
+        oee_target: 0.90
+      - machine_id: "MCH-003"
+        name: "Quality Inspection"
+        type: "inspection"
+        oee_target: 0.95
+
+  - line_id: "PL-002"
+    name: "Packaging Line B"
+    facility_id: "FAC-001"
+    facility_name: "Main Manufacturing Plant"
+    region: "northeast"
+    products: ["PROD-004", "PROD-005", "PROD-006"]
+    capacity_per_hour: 500
+    shift_pattern: "2x12"
+    machines:
+      - machine_id: "MCH-004"
+        name: "Filling Machine"
+        type: "filling"
+        oee_target: 0.88
+      - machine_id: "MCH-005"
+        name: "Sealing Machine"
+        type: "sealing"
+        oee_target: 0.92
+      - machine_id: "MCH-006"
+        name: "Label Printer"
+        type: "labeling"
+        oee_target: 0.95
+
+  - line_id: "PL-003"
+    name: "Assembly Line C"
+    facility_id: "FAC-002"
+    facility_name: "West Coast Assembly"
+    region: "west"
+    products: ["PROD-007", "PROD-008", "PROD-009", "PROD-010"]
+    capacity_per_hour: 150
+    shift_pattern: "3x8"
+    machines:
+      - machine_id: "MCH-007"
+        name: "Mixing Station"
+        type: "mixing"
+        oee_target: 0.87
+      - machine_id: "MCH-008"
+        name: "Molding Machine"
+        type: "molding"
+        oee_target: 0.84
+      - machine_id: "MCH-009"
+        name: "Assembly Robot"
+        type: "robotic"
+        oee_target: 0.90
+
+regions:
+  - region_id: "northeast"
+    name: "Northeast"
+    states: ["NY", "NJ", "CT", "MA", "PA"]
+    population_weight: 0.22
+    demand_multiplier: 1.15
+
+  - region_id: "southeast"
+    name: "Southeast"
+    states: ["GA", "FL", "NC", "SC", "VA"]
+    population_weight: 0.20
+    demand_multiplier: 1.05
+
+  - region_id: "midwest"
+    name: "Midwest"
+    states: ["IL", "OH", "MI", "IN", "WI"]
+    population_weight: 0.18
+    demand_multiplier: 0.95
+
+  - region_id: "west"
+    name: "West Coast"
+    states: ["CA", "OR", "WA", "NV", "AZ"]
+    population_weight: 0.25
+    demand_multiplier: 1.20
+
+  - region_id: "southwest"
+    name: "Southwest"
+    states: ["TX", "NM", "OK", "LA", "AR"]
+    population_weight: 0.15
+    demand_multiplier: 0.90
+
+seasonality:
+  # Monthly demand multipliers (1.0 = average)
+  monthly_multipliers:
+    1: 0.85   # January - post-holiday dip
+    2: 0.80   # February
+    3: 0.95   # March
+    4: 1.00   # April
+    5: 1.05   # May
+    6: 1.10   # June
+    7: 0.95   # July
+    8: 0.95   # August
+    9: 1.05   # September
+    10: 1.10  # October
+    11: 1.30  # November - holiday prep
+    12: 1.50  # December - peak
+
+  # Day of week multipliers
+  dow_multipliers:
+    0: 0.70   # Sunday
+    1: 1.10   # Monday
+    2: 1.05   # Tuesday
+    3: 1.00   # Wednesday
+    4: 1.10   # Thursday
+    5: 1.20   # Friday
+    6: 1.15   # Saturday
+
+  # Hour of day multipliers
+  hod_multipliers:
+    0: 0.10
+    1: 0.05
+    2: 0.03
+    3: 0.02
+    4: 0.02
+    5: 0.05
+    6: 0.15
+    7: 0.35
+    8: 0.60
+    9: 0.85
+    10: 1.00
+    11: 1.05
+    12: 0.90
+    13: 0.95
+    14: 1.00
+    15: 1.05
+    16: 1.10
+    17: 1.00
+    18: 0.85
+    19: 0.75
+    20: 0.65
+    21: 0.55
+    22: 0.40
+    23: 0.25
+
+promotions:
+  - promotion_id: "PROM-001"
+    name: "Summer Sale"
+    type: "seasonal"
+    discount_percent: 0.20
+    start_month: 6
+    end_month: 7
+    applicable_categories: ["electronics", "home_garden"]
+
+  - promotion_id: "PROM-002"
+    name: "Back to School"
+    type: "seasonal"
+    discount_percent: 0.15
+    start_month: 8
+    end_month: 8
+    applicable_categories: ["electronics", "apparel"]
+
+  - promotion_id: "PROM-003"
+    name: "Black Friday"
+    type: "flash"
+    discount_percent: 0.30
+    start_month: 11
+    end_month: 11
+    start_day: 24
+    end_day: 30
+    applicable_categories: ["all"]
+
+  - promotion_id: "PROM-004"
+    name: "Holiday Deals"
+    type: "seasonal"
+    discount_percent: 0.25
+    start_month: 12
+    end_month: 12
+    applicable_categories: ["all"]
+
+  - promotion_id: "PROM-005"
+    name: "Flash Friday"
+    type: "weekly_flash"
+    discount_percent: 0.10
+    day_of_week: 4  # Friday
+    applicable_categories: ["electronics", "health_beauty"]

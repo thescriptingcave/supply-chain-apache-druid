@@ -1,0 +1,181 @@
+# Generator Configuration
+
+generator:
+  name: "Supply Chain Data Generator"
+  version: "1.0.0"
+  
+  # Time settings
+  time:
+    start_time: "2024-01-01T00:00:00Z"
+    end_time: "2024-12-31T23:59:59Z"
+    speed_multiplier: 60  # 1 real second = 60 simulated seconds
+    realtime_mode: true   # If true, generates events at current time
+
+  # Event rates (events per second at base rate)
+  rates:
+    inventory_events: 5
+    shipment_events: 3
+    production_events: 2
+    demand_events: 10
+    supplier_events: 1
+    iot_telemetry: 50
+
+  # Anomaly injection
+  anomalies:
+    enabled: true
+    probability: 0.02  # 2% chance of anomaly per event
+    types:
+      - temperature_spike
+      - shipment_delay
+      - inventory_discrepancy
+      - quality_failure
+      - demand_surge
+      - supply_disruption
+
+output:
+  # Kafka configuration
+  kafka:
+    enabled: true
+    bootstrap_servers: "localhost:9092"
+    topics:
+      inventory_events: "supply_chain.inventory_events"
+      shipment_events: "supply_chain.shipment_events"
+      production_events: "supply_chain.production_events"
+      demand_events: "supply_chain.demand_events"
+      supplier_events: "supply_chain.supplier_events"
+      iot_telemetry: "supply_chain.iot_telemetry"
+    acks: "all"
+    compression: "snappy"
+    batch_size: 16384
+    linger_ms: 10
+
+  # File output for backup/debugging
+  file:
+    enabled: true
+    output_dir: "./data/output"
+    format: "json"
+    rotate_size_mb: 100
+    compress: true
+
+  # HTTP/REST output
+  http:
+    enabled: false
+    endpoint: "http://localhost:8888/druid/indexer/v1/supervisor"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+
+  # Console output (for debugging)
+  console:
+    enabled: false
+    pretty_print: true
+    max_events_per_second: 5
+
+# Druid-specific configurations for reference
+druid:
+  datasource_configs:
+    inventory_events:
+      granularity: "minute"
+      rollup: true
+      dimensions:
+        - warehouse_id
+        - warehouse_region
+        - warehouse_type
+        - product_id
+        - product_category
+        - product_subcategory
+        - sku
+        - event_type
+        - stock_status
+        - zone_id
+        - supplier_id
+      metrics:
+        - type: "longSum"
+          name: "quantity_change"
+          fieldName: "quantity_change"
+        - type: "doubleSum"
+          name: "total_value"
+          fieldName: "total_value"
+        - type: "longMin"
+          name: "min_stock_level"
+          fieldName: "current_stock_level"
+        - type: "longMax"
+          name: "max_stock_level"
+          fieldName: "current_stock_level"
+        - type: "count"
+          name: "event_count"
+
+    shipment_events:
+      granularity: "minute"
+      rollup: true
+      dimensions:
+        - shipment_id
+        - order_id
+        - origin_region
+        - destination_region
+        - carrier_id
+        - status
+        - route_id
+      metrics:
+        - type: "doubleMin"
+          name: "min_temperature"
+          fieldName: "temperature_celsius"
+        - type: "doubleMax"
+          name: "max_temperature"
+          fieldName: "temperature_celsius"
+        - type: "longSum"
+          name: "total_delay_minutes"
+          fieldName: "delay_minutes"
+        - type: "count"
+          name: "event_count"
+
+    demand_events:
+      granularity: "hour"
+      rollup: true
+      dimensions:
+        - product_id
+        - product_category
+        - customer_segment
+        - channel
+        - region
+        - promotion_id
+        - order_priority
+      metrics:
+        - type: "longSum"
+          name: "total_quantity"
+          fieldName: "quantity_ordered"
+        - type: "doubleSum"
+          name: "total_revenue"
+          fieldName: "net_amount"
+        - type: "doubleSum"
+          name: "total_discount"
+          fieldName: "discount_amount"
+        - type: "count"
+          name: "order_count"
+        - type: "longSum"
+          name: "backorder_quantity"
+          fieldName: "backorder_quantity"
+
+    iot_telemetry:
+      granularity: "second"
+      rollup: false
+      dimensions:
+        - device_id
+        - device_type
+        - location_id
+        - location_type
+        - metric_name
+        - is_alert
+        - alert_severity
+      metrics:
+        - type: "doubleMin"
+          name: "min_value"
+          fieldName: "metric_value"
+        - type: "doubleMax"
+          name: "max_value"
+          fieldName: "metric_value"
+        - type: "doubleAvg"
+          name: "avg_value"
+          fieldName: "metric_value"
+        - type: "count"
+          name: "reading_count"

@@ -1,0 +1,99 @@
+# environment - Apache Druid Docker Configuration
+# Env var convention: underscores map to dots (druid_zk_service_host -> druid.zk.service.host)
+# Invalid property names are SILENTLY IGNORED by Druid -- spelling matters.
+
+# ==========================================
+# COMMON
+# ==========================================
+DRUID_LOG_LEVEL=info
+DRUID_USE_CONTAINER_IP=true
+
+# JVM sizing (per service). Emulated amd64 JVMs on Apple Silicon --
+# explicit sizing avoids container-memory autodetection surprises.
+DRUID_XMX=1g
+DRUID_XMS=1g
+DRUID_MAXDIRECTMEMORYSIZE=2g
+
+# REQUIRED: extensions must be explicitly loaded.
+# - postgresql-metadata-storage : without this, the Postgres metadata config below fails
+# - druid-kafka-indexing-service: without this, Kafka ingestion supervisors cannot be created
+druid_extensions_loadList=["druid-histogram", "druid-datasketches", "druid-lookups-cached-global", "postgresql-metadata-storage", "druid-kafka-indexing-service", "druid-multi-stage-query"]
+
+# ==========================================
+# ZOOKEEPER (Druid service discovery)
+# ==========================================
+# FIX: was druid_zk_serviceHost -> mapped to invalid druid.zk.serviceHost -> ignored -> defaulted to localhost
+druid_zk_service_host=zookeeper
+druid_zk_paths_base=/druid
+
+# ==========================================
+# COORDINATOR
+# ==========================================
+# FIX: was druid_coordinator_balancerStrategy (invalid property name)
+druid_coordinator_balancer_strategy=cachingCost
+
+# ==========================================
+# QUERY PROCESSING (broker / historical / tasks)
+# ==========================================
+# Direct memory needed = (numThreads + numMergeBuffers + 1) * buffer_sizeBytes
+# (2 + 2 + 1) * 256MiB = 1280MiB, fits within DRUID_MAXDIRECTMEMORYSIZE=2g
+druid_processing_numThreads=2
+druid_processing_numMergeBuffers=2
+druid_processing_buffer_sizeBytes=256MiB
+
+# ==========================================
+# HISTORICAL
+# ==========================================
+druid_historical_cache_useCache=true
+# FIX: was druid_historical_cachepopulatePriority (invalid) -- real property is populateCache
+druid_historical_cache_populateCache=true
+
+# ==========================================
+# BROKER
+# ==========================================
+druid_broker_http_numConnections=20
+druid_broker_cache_useCache=false
+druid_broker_cache_populateCache=false
+druid_broker_cache_useResultLevelCache=true
+druid_broker_cache_populateResultLevelCache=true
+
+# ==========================================
+# MIDDLEMANAGER / INGESTION TASKS
+# ==========================================
+druid_indexer_runner_javaOptsArray=["-server", "-Xms512m", "-Xmx512m", "-XX:MaxDirectMemorySize=768m", "-XX:+ExitOnOutOfMemoryError", "-Duser.timezone=UTC", "-Dfile.encoding=UTF-8"]
+druid_indexer_task_gracefulShutdownTimeout=PT5M
+# Peon (task) processes get smaller buffers than query nodes
+druid_indexer_fork_property_druid_processing_numThreads=1
+druid_indexer_fork_property_druid_processing_numMergeBuffers=2
+druid_indexer_fork_property_druid_processing_buffer_sizeBytes=100MiB
+
+# ==========================================
+# ROUTER
+# ==========================================
+druid_router_http_numConnections=50
+
+# ==========================================
+# METADATA STORAGE (PostgreSQL)
+# ==========================================
+druid_metadata_storage_type=postgresql
+druid_metadata_storage_connector_connectURI=jdbc:postgresql://druid-metadata:5432/druid
+druid_metadata_storage_connector_user=druid
+druid_metadata_storage_connector_password=druid
+
+# ==========================================
+# TASK LOGS
+# ==========================================
+# FIX: was type=postgresql (invalid -- postgres is valid for metadata, NOT task logs)
+# and property name was druid_indexer_logs_storage_type (invalid -- it's druid.indexer.logs.type)
+druid_indexer_logs_type=file
+druid_indexer_logs_directory=/opt/shared/indexing-logs
+
+# ==========================================
+# DEEP STORAGE (shared volume across services)
+# ==========================================
+# FIX: was druid_storage_directory (invalid -- it's druid.storage.storageDirectory)
+# and pointed at /opt/druid/var, which is PER-CONTAINER: middleManager would write
+# segments the historical could never see. /opt/shared is a shared Docker volume
+# mounted on coordinator, historical, and middleManager (see docker-compose.yaml).
+druid_storage_type=local
+druid_storage_storageDirectory=/opt/shared/segments

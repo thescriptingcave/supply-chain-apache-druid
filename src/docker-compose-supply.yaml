@@ -1,0 +1,291 @@
+services:
+  # Apache Zookeeper
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - druid-network
+
+  # Apache Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server=localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Create Kafka topics
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-init
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo 'Waiting for Kafka to be ready...'
+      sleep 10
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.inventory_events --partitions 3 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.shipment_events --partitions 3 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.production_events --partitions 2 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.demand_events --partitions 3 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.supplier_events --partitions 2 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic supply_chain.iot_telemetry --partitions 6 --replication-factor 1
+      echo 'Kafka topics created successfully'
+      "
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # PostgreSQL for Druid Metadata
+  druid-metadata:
+    image: postgres:15-alpine
+    container_name: druid-metadata
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: druid
+      POSTGRES_USER: druid
+      POSTGRES_PASSWORD: druid_password_change_me
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U druid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - druid-network
+
+  # Apache Druid - Coordinator
+  druid-coordinator:
+    image: apache/druid:29.0.0
+    container_name: druid-coordinator
+    ports:
+      - "8081:8081"
+    command:
+      - coordinator
+    env_file:
+      - ./environment
+    volumes:
+      - druid-coordinator-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-metadata:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Apache Druid - Overlord
+  druid-overlord:
+    image: apache/druid:29.0.0
+    container_name: druid-overlord
+    ports:
+      - "8093:8093"
+    command:
+      - overlord
+    env_file:
+      - ./environment
+    volumes:
+      - druid-overlord-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8093/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-metadata:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Apache Druid - Broker
+  druid-broker:
+    image: apache/druid:29.0.0
+    container_name: druid-broker
+    ports:
+      - "8082:8082"
+    command:
+      - broker
+    env_file:
+      - ./environment
+    volumes:
+      - druid-broker-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-coordinator:
+        condition: service_healthy
+      druid-overlord:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Apache Druid - Historical
+  druid-historical:
+    image: apache/druid:29.0.0
+    container_name: druid-historical
+    ports:
+      - "8083:8083"
+    command:
+      - historical
+    env_file:
+      - ./environment
+    volumes:
+      - druid-historical-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-coordinator:
+        condition: service_healthy
+      druid-overlord:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Apache Druid - MiddleManager
+  druid-middlemanager:
+    image: apache/druid:29.0.0
+    container_name: druid-middlemanager
+    ports:
+      - "8091:8091"
+    command:
+      - middleManager
+    env_file:
+      - ./environment
+    volumes:
+      - druid-middlemanager-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-coordinator:
+        condition: service_healthy
+      druid-overlord:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Apache Druid - Router
+  druid-router:
+    image: apache/druid:29.0.0
+    container_name: druid-router
+    ports:
+      - "8889:8889"
+    command:
+      - router
+    env_file:
+      - ./environment
+    volumes:
+      - druid-router-data:/opt/druid/var
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8889/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      druid-coordinator:
+        condition: service_healthy
+      druid-overlord:
+        condition: service_healthy
+      druid-broker:
+        condition: service_healthy
+    networks:
+      - druid-network
+
+  # Data Generator
+  data-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile.generator
+    container_name: data-generator
+    working_dir: /app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - druid-network
+
+networks:
+  druid-network:
+    driver: bridge
+
+volumes:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
+  postgres-data:
+  druid-coordinator-data:
+  druid-overlord-data:
+  druid-broker-data:
+  druid-historical-data:
+  druid-middlemanager-data:
+  druid-router-data:
