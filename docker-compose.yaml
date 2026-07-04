@@ -188,6 +188,49 @@ services:
       - druid-network
 
 # ==========================================
+  # SUPERSET (BI layer)
+  #
+  # Native arm64 image (runs unemulated on Apple Silicon).
+  # pydruid is installed at build time -- it is the SQLAlchemy
+  # driver Superset needs to talk to Druid SQL.
+  # Superset's own metadata lives in a second database on the
+  # existing Postgres container (create once:
+  #   docker exec druid-metadata psql -U druid -c "CREATE DATABASE superset;")
+  #
+  # First-time init (run once after `docker compose up -d superset`):
+  #   docker exec superset superset db upgrade
+  #   docker exec superset superset fab create-admin \
+  #     --username admin --firstname Admin --lastname User \
+  #     --email admin@localhost --password admin
+  #   docker exec superset superset init
+  #
+  # UI: http://localhost:8088  (admin/admin)
+  # Druid connection URI (inside the UI, trailing slash required):
+  #   druid://druid-broker:8082/druid/v2/sql/
+  # ==========================================
+  superset:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM apache/superset:4.1.1
+        USER root
+        RUN pip install --no-cache-dir pydruid psycopg2-binary
+        USER superset
+    container_name: superset
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: "5O5qCa1wFbgrjuQZzuWB6lDDDcKcG-P6DNNW7O7SiY1gC4lrl0cP_aWi"
+      SQLALCHEMY_DATABASE_URI: "postgresql+psycopg2://druid:druid@druid-metadata:5432/superset"
+    volumes:
+      - superset-data:/app/superset_home
+    depends_on:
+      - druid-metadata
+      - druid-broker
+    networks:
+      - druid-network
+
+# ==========================================
 # NETWORKS + VOLUMES
 # ==========================================
 networks:
@@ -198,3 +241,4 @@ volumes:
   postgres-data:
   kafka-data:
   druid-shared:
+  superset-data:
