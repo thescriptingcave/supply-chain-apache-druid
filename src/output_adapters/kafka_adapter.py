@@ -18,7 +18,7 @@ class KafkaOutputAdapter(BaseOutputAdapter):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         
-        self.bootstrap_servers = config.get('bootstrap_servers', 'localhost:9092')
+        self.bootstrap_servers = config['bootstrap_servers']
         self.topic_mapping = config.get('topics', {})
         self.acks = config.get('acks', 'all')
         self.compression = config.get('compression', 'snappy')
@@ -39,7 +39,7 @@ class KafkaOutputAdapter(BaseOutputAdapter):
                 compression_type=self.compression,
                 batch_size=self.batch_size,
                 linger_ms=self.linger_ms,
-                max_retries=3,
+                retries=3,
                 retry_backoff_ms=100
             )
             logger.info(f"Connected to Kafka at {self.bootstrap_servers}")

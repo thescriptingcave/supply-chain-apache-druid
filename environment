@@ -39,7 +39,7 @@ druid_coordinator_balancer_strategy=cachingCost
 # (2 + 2 + 1) * 256MiB = 1280MiB, fits within DRUID_MAXDIRECTMEMORYSIZE=2g
 druid_processing_numThreads=2
 druid_processing_numMergeBuffers=2
-druid_processing_buffer_sizeBytes=256MiB
+druid_processing_buffer_sizeBytes=100MiB
 
 # ==========================================
 # HISTORICAL
@@ -60,9 +60,9 @@ druid_broker_cache_populateResultLevelCache=true
 # ==========================================
 # MIDDLEMANAGER / INGESTION TASKS
 # ==========================================
+druid_worker_capacity=8
 druid_indexer_runner_javaOptsArray=["-server", "-Xms512m", "-Xmx512m", "-XX:MaxDirectMemorySize=768m", "-XX:+ExitOnOutOfMemoryError", "-Duser.timezone=UTC", "-Dfile.encoding=UTF-8"]
 druid_indexer_task_gracefulShutdownTimeout=PT5M
-# Peon (task) processes get smaller buffers than query nodes
 druid_indexer_fork_property_druid_processing_numThreads=1
 druid_indexer_fork_property_druid_processing_numMergeBuffers=2
 druid_indexer_fork_property_druid_processing_buffer_sizeBytes=100MiB

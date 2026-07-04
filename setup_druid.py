@@ -9,7 +9,7 @@ async def main():
     # Creates Kafka supervisors linking your topics to Druid datasources
     results = await setup_druid_kafka_ingestion(
         druid_router_url='http://localhost:8888',
-        kafka_brokers='kafka:9092' # 'kafka' is the Docker network hostname
+        kafka_brokers='kafka:29092' # 'kafka' is the Docker network hostname
     )
     
     for event_type, success in results.items():
